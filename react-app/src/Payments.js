@@ -11,10 +11,13 @@ function Payments() {
 
   // Create a payment intent on the server
   const createPaymentIntent = async (event) => {
-    // Clamp value to Stripe's min/max
-    setAmount( Math.min(Math.max(amount, 50), 9999999))
+
+    // Clamp amount to Stripe min/max
+    const validAmonut = Math.min(Math.max(amount, 50), 9999999);
+    setAmount(validAmonut);
+
     // Make the API Request
-    const pi = await fetchFromAPI('payments', { body: { amount } });
+    const pi = await fetchFromAPI('payments', { body: { amount: validAmonut } });
     setPaymentIntent(pi);
   };
 
@@ -71,7 +74,7 @@ function Payments() {
           disabled={amount <= 0}
           onClick={createPaymentIntent}
           hidden={paymentIntent}>
-          Ready to Pay
+          Ready to Pay ${ (amount / 100).toFixed(2) }
         </button>
       </div>
       </div>
