@@ -1,3 +1,5 @@
+// Initialize Firebase Admin resources
+
 import * as firebaseAdmin from 'firebase-admin';
 firebaseAdmin.initializeApp();
 

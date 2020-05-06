@@ -1,9 +1,12 @@
 import { stripe } from './';
 import Stripe from 'stripe';
 
-export const createStripeCheckoutSession = async (
+/**
+ * Creates a Stripe Checkout session with line items
+ */
+export async function createStripeCheckoutSession(
   line_items: Stripe.Checkout.SessionCreateParams.LineItem[]
-) => {
+) {
   // Example Item
   // {
   //   name: 'T-shirt',
@@ -24,4 +27,4 @@ export const createStripeCheckoutSession = async (
   });
 
   return session;
-};
+}

@@ -9,17 +9,19 @@ function Payments() {
   const [amount, setAmount] = useState(0);
   const [paymentIntent, setPaymentIntent] = useState();
 
+  // Create a payment intent on the server
   const createPaymentIntent = async (event) => {
     const pi = await fetchFromAPI('payments', { body: { amount } });
     setPaymentIntent(pi);
   };
 
+  // Handle the submission of card details
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     const cardElement = elements.getElement(CardElement);
 
-    // Use your card Element with other Stripe.js APIs
+    // Confirm Card Payment
     const {
       paymentIntent: updatedPaymentIntent,
       error,

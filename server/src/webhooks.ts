@@ -2,7 +2,9 @@ import { stripe } from './';
 import Stripe from 'stripe';
 import { db } from './firebase';
 
-/// Business logic for handling webhooks events
+/**
+ * Business logic for specific webhook event types
+ */
 const webhookHandlers = {
     'checkout.session.completed': async (data: Stripe.Event.Data) => {
       // Add your business logic here
@@ -25,7 +27,9 @@ const webhookHandlers = {
     }
 }
 
-/// Validate the stripe webhook, then call the handler 
+/**
+ * Validate the stripe webhook secret, then call the handler for the event type
+ */
 export const handleStripeWebhook = async(req, res) => {
   const sig = req.headers['stripe-signature'];
   const event = stripe.webhooks.constructEvent(req['rawBody'], sig, process.env.STRIPE_WEBHOOK_SECRET);

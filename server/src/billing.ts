@@ -4,11 +4,15 @@ import Stripe from 'stripe';
 import { getOrCreateCustomer } from './customers';
 import { firestore } from 'firebase-admin';
 
-export const createSubscription = async (
+/**
+ * Attaches a payment method to the Stripe customer,
+ * subscribes to a Stripe plan, and saves the plan to Firestore
+ */
+export async function createSubscription(
   userId: string,
   plan: string,
   payment_method: string
-) => {
+) {
   const customer = await getOrCreateCustomer(userId);
 
   // Attach the  payment method to the customer
@@ -48,12 +52,15 @@ export const createSubscription = async (
   }
 
   return subscription;
-};
+}
 
-export const cancelSubscription = async (
+/**
+ * Cancels an active subscription, syncs the data in Firestore
+ */
+export async function cancelSubscription(
   userId: string,
   subscriptionId: string
-) => {
+) {
   const customer = await getOrCreateCustomer(userId);
   if (customer.metadata.firebaseUID !== userId) {
     throw Error('Firebase UID does not match Stripe Customer');
@@ -73,8 +80,12 @@ export const cancelSubscription = async (
   }
 
   return subscription;
-};
-export const listSubscriptions = async (userId: string) => {
+}
+
+/**
+ * Returns all the subscriptions linked to a Firebase userID in Stripe
+ */
+export async function listSubscriptions(userId: string) {
   const customer = await getOrCreateCustomer(userId);
   const subscriptions = await stripe.subscriptions.list({
     customer: customer.id,

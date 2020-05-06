@@ -13,7 +13,7 @@ import {
 } from './billing';
 import { handleStripeWebhook } from './webhooks';
 
-////// MIDDLEWARE
+////// MIDDLEWARE  //////
 
 // Allows cross origin requests
 app.use(cors({ origin: true }));
@@ -28,17 +28,10 @@ app.use(
 // Decodes the Firebase JSON Web Token
 app.use(decodeJWT);
 
-///// HELPERS /////
-
-// Ensures the express can catch errors inside an async function
-function runAsync(callback: Function) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    callback(req, res, next).catch(next);
-  };
-}
-
-// Decodes the JSON Web Token sent via the frontend app
-// Makes the currentUser (firebase) available on the body
+/**
+ * Decodes the JSON Web Token sent via the frontend app
+ * Makes the currentUser (firebase) data available on the body.
+ */
 async function decodeJWT(req: Request, res: Response, next: NextFunction) {
   if (req.headers?.authorization?.startsWith('Bearer ')) {
     const idToken = req.headers.authorization.split('Bearer ')[1];
@@ -54,7 +47,20 @@ async function decodeJWT(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-// Validates that a request includes an Authenticated Firebase user
+///// HELPERS /////
+
+/**
+ * Validate the stripe webhook secret, then call the handler for the event type
+ */
+function runAsync(callback: Function) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    callback(req, res, next).catch(next);
+  };
+}
+
+/**
+ * Throws an error if the currentUser does not exist on the request
+ */
 function validateUser(req: Request) {
   const user = req['currentUser'];
   if (!user) {
@@ -68,14 +74,14 @@ function validateUser(req: Request) {
 
 ///// MAIN API /////
 
-app.post('/test', (req: Request, res: Response) => {
-  const amount = req.body.amount;
-  res.status(200).send({ with_tax: amount * 7 });
-});
+// app.post('/test', (req: Request, res: Response) => {
+//   const amount = req.body.amount;
+//   res.status(200).send({ with_tax: amount * 7 });
+// });
 
-// Checkouts
-
-// Create a Checkout Session
+/**
+ * Checkouts
+ */
 app.post(
   '/checkouts/',
   runAsync(async ({ body }: Request, res: Response) => {
@@ -83,7 +89,9 @@ app.post(
   })
 );
 
-// Payments
+/**
+ * Payment Intents API
+ */
 
 // Create a PaymentIntent
 app.post(
@@ -93,7 +101,9 @@ app.post(
   })
 );
 
-// Customers
+/**
+ * Customers and Setup Intents
+ */
 
 // Save a card on the customer record with a SetupIntent
 app.post(
@@ -116,7 +126,9 @@ app.get(
   })
 );
 
-// Billing
+/**
+ * Billing and Recurring Subscriptions
+ */
 
 // Create a and charge new Subscription
 app.post(
@@ -140,7 +152,7 @@ app.get(
   })
 );
 
-// Unsubscibe or cancel a subscription
+// Unsubscribe or cancel a subscription
 app.patch(
   '/subscriptions/:id',
   runAsync(async (req: Request, res: Response) => {
@@ -148,6 +160,10 @@ app.patch(
     res.send(await cancelSubscription(user.uid, req.params.id));
   })
 );
+
+/**
+ * Webhooks
+ */
 
 // Handle webhooks
 app.post('/hooks', runAsync(handleStripeWebhook));

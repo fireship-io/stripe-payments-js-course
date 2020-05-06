@@ -3,7 +3,10 @@ const API = 'https://stripe-server-apw6lsu5yq-uc.a.run.app';
 // const API = 'http://localhost:3333';
 
 
-
+/**
+ * A helper function to fetch data from your API.
+ * It sets the Firebase auth token on the request. 
+ */
 export async function fetchFromAPI(endpointURL, opts) {
   const { method, body } = { method: 'POST', body: null, ...opts }
   
@@ -22,7 +25,6 @@ export async function fetchFromAPI(endpointURL, opts) {
   
     return res.json();
   } catch(error) {
-    console.llog('asdfadsfsd')
     alert(error.message)
   }
 

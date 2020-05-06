@@ -39,21 +39,24 @@ function SaveCard(props) {
   const [setupIntent, setSetupIntent] = useState();
   const [wallet, setWallet] = useState([]);
 
+  // Get the user's wallet on mount
   useEffect(() => {
     getWallet();
   }, [user]);
 
+  // Create the setup intent
   const createSetupIntent = async (event) => {
     const si = await fetchFromAPI('wallet');
     setSetupIntent(si);
   };
 
+  // Handle the submission of card details
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     const cardElement = elements.getElement(CardElement);
 
-    // Use your card Element with other Stripe.js APIs
+    // Confirm Card Setup
     const {
       setupIntent: updatedSetupIntent,
       error,

@@ -10,6 +10,7 @@ function UserData(props) {
 
   const [data, setData] = useState({});
 
+  // Subscribe to the user's data in Firestore
   useEffect(
     () => {
       const unsubscribe = db.collection('users').doc(props.user.uid).onSnapshot(doc => setData(doc.data()) )
@@ -36,10 +37,12 @@ function SubscribeToPlan(props) {
 
   const [plan, setPlan] = useState();
 
+  // Get current subscriptions on mount
   useEffect(() => {
     getSubscrptions();
   }, [user]);
 
+  // Fetch current subscriptions from the API
   const getSubscrptions = async () => {
     if (user) {
       const subs = await fetchFromAPI('subscriptions', { method: 'GET' });
@@ -47,6 +50,7 @@ function SubscribeToPlan(props) {
     }
   };
 
+  // Cancel a subscription
   const cancel = async (id) => {
     setLoading(true);
     await fetchFromAPI('subscriptions/' + id, { method: 'PATCH' });
@@ -55,13 +59,14 @@ function SubscribeToPlan(props) {
     setLoading(false);
   };
 
+  // Handle the submission of card details
   const handleSubmit = async (event) => {
     setLoading(true);
     event.preventDefault();
 
     const cardElement = elements.getElement(CardElement);
 
-    // Use your card Element with other Stripe.js APIs
+    // Create Payment Method
     const { paymentMethod, error } = await stripe.createPaymentMethod({
       type: 'card',
       card: cardElement,
@@ -73,12 +78,17 @@ function SubscribeToPlan(props) {
       return;
     }
 
+    // Create Subscription on the Server
     const subscription = await fetchFromAPI('subscriptions', {
       body: {
         plan,
         payment_method: paymentMethod.id,
       },
     });
+
+    // The subscription contains an invoice
+    // If the invoice's payment succeeded then you're good, 
+    // otherwise, the payment intent must be confirmed
 
     const { latest_invoice } = subscription;
 
@@ -195,23 +205,6 @@ function SubscribeToPlan(props) {
     </>
   );
 }
-
-// function StripeSubscription({ data }) {
-//   const cancel = async () => {
-//     await post('subscriptions/' + data.id, {}, 'PATCH');
-//     alert('canceled!');
-//   };
-
-//   return (
-//     <>
-//       {data.id}. Next payment of {data.plan.amount} due{' '}
-//       {new Date(data.current_period_end).toUTCString()}
-//       <button className="btn btn-sm btn-danger" onClick={cancel}>
-//         Cancel
-//       </button>
-//     </>
-//   );
-// }
 
 export default function Subscriptions() {
   return (
