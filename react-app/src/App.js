@@ -96,8 +96,8 @@ function Home() {
         payments with testing cards.
       </p>
       <p>
-        Reference the <a href="https://github.com">source code</a> and watch the{' '}
-        <a href="https://github.com">full course</a>.{' '}
+        Reference the <a href="https://github.com/fireship-io/stripe-payments-js-course">source code</a> and watch the{' '}
+        <a href="https://fireship.io/courses/stripe-js">Full Stripe JavaScript Course</a>.{' '}
       </p>
     </>
   );

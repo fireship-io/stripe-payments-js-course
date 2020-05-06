@@ -11,6 +11,9 @@ function Payments() {
 
   // Create a payment intent on the server
   const createPaymentIntent = async (event) => {
+    // Clamp value to Stripe's min/max
+    setAmount( Math.min(Math.max(amount, 50), 9999999))
+    // Make the API Request
     const pi = await fetchFromAPI('payments', { body: { amount } });
     setPaymentIntent(pi);
   };
@@ -52,7 +55,7 @@ function Payments() {
       <h3>Step 1: Create a Payment Intent</h3>
       <p>
         Change the amount of the payment in the form, then request a Payment
-        Intent to create context for one-time payment. Min 50, Max 99999999 
+        Intent to create context for one-time payment. Min 50, Max 9999999
       </p>
 
       <div className="form-inline">

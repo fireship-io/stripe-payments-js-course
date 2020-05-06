@@ -6,7 +6,7 @@ import firebase from 'firebase/app';
 
 import { auth, db } from './firebase';
 
-export function SignIn(props) {
+export function SignIn() {
   const signIn = async () => {
     const credential = await auth.signInWithPopup(
       new firebase.auth.GoogleAuthProvider()

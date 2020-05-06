@@ -25,6 +25,7 @@ export async function fetchFromAPI(endpointURL, opts) {
   
     return res.json();
   } catch(error) {
+    console.error(error)
     alert(error.message)
   }
 
