@@ -5,7 +5,7 @@ import Stripe from 'stripe';
 /**
  * Creates a SetupIntent used to save a credit card for later use
  */
-export async function createSetupIntent = async (userId: string) => {
+export async function createSetupIntent(userId: string) {
 
     const customer = await getOrCreateCustomer(userId);
 
