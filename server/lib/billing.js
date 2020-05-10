@@ -4,7 +4,11 @@ const _1 = require("./");
 const firebase_1 = require("./firebase");
 const customers_1 = require("./customers");
 const firebase_admin_1 = require("firebase-admin");
-exports.createSubscription = async (userId, plan, payment_method) => {
+/**
+ * Attaches a payment method to the Stripe customer,
+ * subscribes to a Stripe plan, and saves the plan to Firestore
+ */
+async function createSubscription(userId, plan, payment_method) {
     const customer = await customers_1.getOrCreateCustomer(userId);
     // Attach the  payment method to the customer
     await _1.stripe.paymentMethods.attach(payment_method, { customer: customer.id });
@@ -17,13 +21,10 @@ exports.createSubscription = async (userId, plan, payment_method) => {
         items: [{ plan }],
         expand: ['latest_invoice.payment_intent'],
     });
-    // Update the users document in Firestore
     const invoice = subscription.latest_invoice;
     const payment_intent = invoice.payment_intent;
-    payment_intent.invoice;
     // Update the user's status
     if (payment_intent.status === 'succeeded') {
-        // const plan =
         await firebase_1.db
             .collection('users')
             .doc(userId)
@@ -33,8 +34,12 @@ exports.createSubscription = async (userId, plan, payment_method) => {
         }, { merge: true });
     }
     return subscription;
-};
-exports.cancelSubscription = async (userId, subscriptionId) => {
+}
+exports.createSubscription = createSubscription;
+/**
+ * Cancels an active subscription, syncs the data in Firestore
+ */
+async function cancelSubscription(userId, subscriptionId) {
     const customer = await customers_1.getOrCreateCustomer(userId);
     if (customer.metadata.firebaseUID !== userId) {
         throw Error('Firebase UID does not match Stripe Customer');
@@ -51,12 +56,18 @@ exports.cancelSubscription = async (userId, subscriptionId) => {
         });
     }
     return subscription;
-};
-exports.listSubscriptions = async (userId) => {
+}
+exports.cancelSubscription = cancelSubscription;
+/**
+ * Returns all the subscriptions linked to a Firebase userID in Stripe
+ */
+async function listSubscriptions(userId) {
     const customer = await customers_1.getOrCreateCustomer(userId);
     const subscriptions = await _1.stripe.subscriptions.list({
         customer: customer.id,
     });
     return subscriptions;
-};
+}
+exports.listSubscriptions = listSubscriptions;
+;
 //# sourceMappingURL=billing.js.map

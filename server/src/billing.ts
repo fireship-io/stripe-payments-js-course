@@ -29,16 +29,12 @@ export async function createSubscription(
     expand: ['latest_invoice.payment_intent'],
   });
 
-  // Update the users document in Firestore
 
   const invoice = subscription.latest_invoice as Stripe.Invoice;
   const payment_intent = invoice.payment_intent as Stripe.PaymentIntent;
 
-  payment_intent.invoice;
-
   // Update the user's status
   if (payment_intent.status === 'succeeded') {
-    // const plan =
     await db
       .collection('users')
       .doc(userId)

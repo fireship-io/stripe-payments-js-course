@@ -136,7 +136,8 @@ app.post(
   runAsync(async (req: Request, res: Response) => {
     const user = validateUser(req);
     const { plan, payment_method } = req.body;
-    res.send(await createSubscription(user.uid, plan, payment_method));
+    const subscription = await createSubscription(user.uid, plan, payment_method);
+    res.send(subscription);
   })
 );
 

@@ -12,7 +12,7 @@ const payments_1 = require("./payments");
 const customers_1 = require("./customers");
 const billing_1 = require("./billing");
 const webhooks_1 = require("./webhooks");
-////// MIDDLEWARE
+////// MIDDLEWARE  //////
 // Allows cross origin requests
 exports.app.use(cors_1.default({ origin: true }));
 // Sets rawBody for webhook handling
@@ -21,15 +21,10 @@ exports.app.use(express_1.default.json({
 }));
 // Decodes the Firebase JSON Web Token
 exports.app.use(decodeJWT);
-///// HELPERS /////
-// Ensures the express can catch errors inside an async function
-function runAsync(callback) {
-    return (req, res, next) => {
-        callback(req, res, next).catch(next);
-    };
-}
-// Decodes the JSON Web Token sent via the frontend app
-// Makes the currentUser (firebase) available on the body
+/**
+ * Decodes the JSON Web Token sent via the frontend app
+ * Makes the currentUser (firebase) data available on the body.
+ */
 async function decodeJWT(req, res, next) {
     var _a, _b;
     if ((_b = (_a = req.headers) === null || _a === void 0 ? void 0 : _a.authorization) === null || _b === void 0 ? void 0 : _b.startsWith('Bearer ')) {
@@ -44,7 +39,18 @@ async function decodeJWT(req, res, next) {
     }
     next();
 }
-// Validates that a request includes an Authenticated Firebase user
+///// HELPERS /////
+/**
+ * Validate the stripe webhook secret, then call the handler for the event type
+ */
+function runAsync(callback) {
+    return (req, res, next) => {
+        callback(req, res, next).catch(next);
+    };
+}
+/**
+ * Throws an error if the currentUser does not exist on the request
+ */
 function validateUser(req) {
     const user = req['currentUser'];
     if (!user) {
@@ -53,21 +59,26 @@ function validateUser(req) {
     return user;
 }
 ///// MAIN API /////
-exports.app.post('/test', (req, res) => {
-    const amount = req.body.amount;
-    res.status(200).send({ with_tax: amount * 7 });
-});
-// Checkouts
-// Create a Checkout Session
+// app.post('/test', (req: Request, res: Response) => {
+//   const amount = req.body.amount;
+//   res.status(200).send({ with_tax: amount * 7 });
+// });
+/**
+ * Checkouts
+ */
 exports.app.post('/checkouts/', runAsync(async ({ body }, res) => {
     res.send(await checkout_1.createStripeCheckoutSession(body.line_items));
 }));
-// Payments
+/**
+ * Payment Intents API
+ */
 // Create a PaymentIntent
 exports.app.post('/payments', runAsync(async ({ body }, res) => {
     res.send(await payments_1.createPaymentIntent(body.amount));
 }));
-// Customers
+/**
+ * Customers and Setup Intents
+ */
 // Save a card on the customer record with a SetupIntent
 exports.app.post('/wallet', runAsync(async (req, res) => {
     const user = validateUser(req);
@@ -80,12 +91,15 @@ exports.app.get('/wallet', runAsync(async (req, res) => {
     const wallet = await customers_1.listPaymentMethods(user.uid);
     res.send(wallet.data);
 }));
-// Billing
+/**
+ * Billing and Recurring Subscriptions
+ */
 // Create a and charge new Subscription
 exports.app.post('/subscriptions/', runAsync(async (req, res) => {
     const user = validateUser(req);
     const { plan, payment_method } = req.body;
-    res.send(await billing_1.createSubscription(user.uid, plan, payment_method));
+    const subscription = await billing_1.createSubscription(user.uid, plan, payment_method);
+    res.send(subscription);
 }));
 // Get all subscriptions for a customer
 exports.app.get('/subscriptions/', runAsync(async (req, res) => {
@@ -93,11 +107,14 @@ exports.app.get('/subscriptions/', runAsync(async (req, res) => {
     const subscriptions = await billing_1.listSubscriptions(user.uid);
     res.send(subscriptions.data);
 }));
-// Unsubscibe or cancel a subscription
+// Unsubscribe or cancel a subscription
 exports.app.patch('/subscriptions/:id', runAsync(async (req, res) => {
     const user = validateUser(req);
     res.send(await billing_1.cancelSubscription(user.uid, req.params.id));
 }));
+/**
+ * Webhooks
+ */
 // Handle webhooks
 exports.app.post('/hooks', runAsync(webhooks_1.handleStripeWebhook));
 //# sourceMappingURL=api.js.map

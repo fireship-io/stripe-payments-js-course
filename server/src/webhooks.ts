@@ -1,6 +1,7 @@
 import { stripe } from './';
 import Stripe from 'stripe';
 import { db } from './firebase';
+import { firestore } from 'firebase-admin';
 
 /**
  * Business logic for specific webhook event types
@@ -14,6 +15,26 @@ const webhookHandlers = {
     },
     'payment_intent.payment_failed': async (data: Stripe.PaymentIntent) => {
       // Add your business logic here
+    },
+    'customer.subscription.deleted': async (data: Stripe.Subscription) => {
+      const customer = await stripe.customers.retrieve( data.customer as string ) as Stripe.Customer;
+      const userId = customer.metadata.firebaseUID;
+      const userRef = db.collection('users').doc(userId);
+
+        await userRef
+          .update({
+            activePlans: firestore.FieldValue.arrayRemove(data.plan.id),
+          });
+    },
+    'customer.subscription.created': async (data: Stripe.Subscription) => {
+      const customer = await stripe.customers.retrieve( data.customer as string ) as Stripe.Customer;
+      const userId = customer.metadata.firebaseUID;
+      const userRef = db.collection('users').doc(userId);
+
+        await userRef
+          .update({
+            activePlans: firestore.FieldValue.arrayUnion(data.plan.id),
+          });
     },
     'invoice.payment_succeeded': async (data: Stripe.Invoice) => {
       // Add your business logic here
@@ -38,6 +59,7 @@ export const handleStripeWebhook = async(req, res) => {
     await webhookHandlers[event.type](event.data.object);
     res.send({received: true});
   } catch (err) {
+    console.error(err)
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
 }

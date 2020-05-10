@@ -1,7 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const _1 = require("./");
-exports.createStripeCheckoutSession = async (line_items) => {
+/**
+ * Creates a Stripe Checkout session with line items
+ */
+async function createStripeCheckoutSession(line_items) {
     // Example Item
     // {
     //   name: 'T-shirt',
@@ -19,5 +22,6 @@ exports.createStripeCheckoutSession = async (line_items) => {
         cancel_url: `${url}/failed`,
     });
     return session;
-};
+}
+exports.createStripeCheckoutSession = createStripeCheckoutSession;
 //# sourceMappingURL=checkout.js.map

@@ -1,4 +1,5 @@
 "use strict";
+// Initialize Firebase Admin resources
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};

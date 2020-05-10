@@ -2,23 +2,31 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const _1 = require("./");
 const firebase_1 = require("./firebase");
-// Creates a SetupIntent used to save a credit card for later use
-exports.createSetupIntent = async (userId) => {
-    const customer = await exports.getOrCreateCustomer(userId);
+/**
+ * Creates a SetupIntent used to save a credit card for later use
+ */
+async function createSetupIntent(userId) {
+    const customer = await getOrCreateCustomer(userId);
     return _1.stripe.setupIntents.create({
         customer: customer.id,
     });
-};
-// Returns all payment sources associated to the user
-exports.listPaymentMethods = async (userId) => {
-    const customer = await exports.getOrCreateCustomer(userId);
+}
+exports.createSetupIntent = createSetupIntent;
+/**
+ * Returns all payment sources associated to the user
+ */
+async function listPaymentMethods(userId) {
+    const customer = await getOrCreateCustomer(userId);
     return _1.stripe.paymentMethods.list({
         customer: customer.id,
         type: 'card',
     });
-};
-// Gets the exsiting Stripe customer or creates a new record
-exports.getOrCreateCustomer = async (userId, params) => {
+}
+exports.listPaymentMethods = listPaymentMethods;
+/**
+ * Gets the exsiting Stripe customer or creates a new record
+ */
+async function getOrCreateCustomer(userId, params) {
     const userSnapshot = await firebase_1.db.collection('users').doc(userId).get();
     const { stripeCustomerId, email } = userSnapshot.data();
     // If missing customerID, create it
@@ -33,5 +41,6 @@ exports.getOrCreateCustomer = async (userId, params) => {
     else {
         return await _1.stripe.customers.retrieve(stripeCustomerId);
     }
-};
+}
+exports.getOrCreateCustomer = getOrCreateCustomer;
 //# sourceMappingURL=customers.js.map
